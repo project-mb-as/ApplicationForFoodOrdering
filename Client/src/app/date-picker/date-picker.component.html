@@ -1,0 +1,3 @@
+<input id="date-picker" (dateChange)="onDateChange($event)" [matDatepicker]="picker1" [formControl]="date">
+<mat-datepicker-toggle [for]="picker1"></mat-datepicker-toggle>
+<mat-datepicker [dateClass]="dateClass" #picker1></mat-datepicker>

@@ -1,0 +1,9 @@
+
+#Visual Studio data
+.vs
+*.csproj.user
+
+*.cache
+packages/
+WebApi/appsettings.Development.json
+WebApi/appsettings.json

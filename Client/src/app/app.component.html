@@ -1,0 +1,28 @@
+<!-- nav -->
+<!--*ngIf="currentUser"-->
+<nav class="navbar navbar-expand navbar-dark bg-dark">
+  <div class="navbar-nav" style="width: 100%">
+    <a class="nav-item nav-link" routerLink="">Meni</a>
+    <!--<a class="nav-item nav-link" routerLink="/">Home</a>-->
+    <!--<a class="nav-item nav-link" routerLink="/novi-meni">Meni</a>-->
+    <a class="nav-item nav-link" routerLink="/options">Opcije</a>
+    <a *ngIf="isAdmin" class="nav-item nav-link" routerLink="/user-managment">Upravljanje korisnicima</a>
+    <a *ngIf="isAdmin || isCook" class="nav-item nav-link" routerLink="/orders-report">Izvještaj za meni</a>
+    <a class="nav-item nav-link mr-2" style="margin-left:auto" (click)="logout()">Logout</a>
+  </div>
+</nav>
+
+<!-- main app container -->
+<div class="container">
+  <router-outlet></router-outlet>
+</div>
+
+<!-- credits -->
+<!--<div class="text-center mt-4">
+    <p>
+        <a href="https://jasonwatmore.com/post/2019/06/22/Client-tutorial" target="_top">Angular 8 - JWT Authentication Example & Tutorial</a>
+    </p>
+    <p>
+        <a href="http://jasonwatmore.com" target="_top">JasonWatmore.com</a>
+    </p>
+</div>-->

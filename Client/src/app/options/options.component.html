@@ -1,0 +1,45 @@
+<div class="card">
+  <div class="card-header" fxLayout="row" fxLayoutAlign="center center">
+    <div fxFlex="50%">
+      <div style="display:inline-block;"><h4>Opcije</h4></div>
+      <span *ngIf="loading" class="spinner-border spinner-border-sm m-1"></span>
+    </div>
+
+    <div fxFlex="50%" fxLayoutAlign="end center">
+      
+      <!--<app-date-picker (dateChange)="onDateChange($event)" [initDate]="nextDay"></app-date-picker>-->
+    </div>
+  </div>
+  <div *ngIf="options" class="card-body">
+    <div fxLayout="row" fxLayoutAlign="space-between center">
+      <section fxFlex="50%" class="right-border">
+        <div class="mb-2">Lokacija za dostavu</div>
+        <mat-radio-group [(ngModel)]="options.locationId" (change)="optionsChanged()">
+          <mat-radio-button *ngFor="let option of orderLocationOptions; let i = index" [value]="i" class="prilog-margin">{{option}}</mat-radio-button>
+        </mat-radio-group>
+      </section>
+
+      <section fxFlex="50%" class="pl-3">
+        <div class="mb-2">Vrijeme dostave</div>
+        <mat-radio-group [(ngModel)]="options.timeId" (change)="optionsChanged()">
+          <mat-radio-button *ngFor="let option of orderTimeOptions; let i = index" [value]="i" class="prilog-margin">{{option}}</mat-radio-button>
+        </mat-radio-group>
+      </section>
+    </div>
+    <br />
+    <br />
+    <div fxLayout="row" fxLayoutAlign="space-between center">
+      <section fxFlex="50%" class="pl-3">
+        <div class="mb-2">Email o potvrdi narudžbe</div>
+        <mat-slide-toggle [(ngModel)]="options.receiveOrderConfirmationEmails" (change)="optionsChanged()"></mat-slide-toggle>
+      </section>
+
+      <section fxFlex="50%" class="pl-3">
+        <div class="mb-2">Email upozorenja za propuštanje narudžbe</div>
+        <mat-slide-toggle [(ngModel)]="options.receiveOrderWarningEmails" (change)="optionsChanged()"></mat-slide-toggle>
+      </section>
+    </div>
+  </div>
+</div>
+
+

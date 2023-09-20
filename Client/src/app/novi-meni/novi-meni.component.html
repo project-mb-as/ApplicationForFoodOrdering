@@ -1,0 +1,249 @@
+
+<div class="card">
+  <div class="card-header" fxLayout="row" fxLayoutAlign="space-between center">
+    <div fxFlex="40%">
+      <div style="display:inline-block;"><h4>Meni za datum</h4></div>
+      <span *ngIf="loading || initMenuLoading || setOrderLoading" class="spinner-border spinner-border-sm m-1"></span>
+    </div>
+    <div fxFlex="20%">
+      <mat-slide-toggle (change)="adminModeChaged()" [(ngModel)]="adminMode" *ngIf="isAdminOrCook">
+        Admin mode
+      </mat-slide-toggle>
+    </div>
+    <div fxFlex="40%" fxLayoutAlign="end center">
+      <app-date-picker (dateChange)="onDateChange($event)" [initDate]="today" [refresh]="refreshCalendar"></app-date-picker>
+    </div>
+  </div>
+  <div class="card-body">
+    <div *ngIf="adminMode">
+      <button class="btn btn-primary" (click)="createMenu()" [disabled]="!menu || !menu.canOrder" title="{{(!menu || !menu.canOrder)? 'Verijeme za narudžbu je isteklo' : ''}}">
+        Snimi meni
+      </button>
+    </div>
+    <div *ngIf="!adminMode" fxLayout="row" fxLayoutAlign="space-between center">
+      <section fxFlex="40%" class="right-border">
+        <div class="mb-2">Lokacija za dostavu</div>
+        <mat-radio-group [(ngModel)]="orderLocation">
+          <mat-radio-button *ngFor="let option of orderLocationOptions; let i = index" [value]="i" class="prilog-margin">{{option}}</mat-radio-button>
+        </mat-radio-group>
+        <!--<div *ngIf="orderError.place" class="error">
+          <div>Lokacija je obavezna</div>
+        </div>-->
+      </section>
+
+      <section fxFlex="40%" class="pl-3">
+        <div class="mb-2">Vrijeme dostave</div>
+        <mat-radio-group [(ngModel)]="orderTime">
+          <mat-radio-button *ngFor="let option of orderTimeOptions; let i = index" [value]="i" class="prilog-margin">{{option}}</mat-radio-button>
+        </mat-radio-group>
+        <!--<div *ngIf="orderError.time" class="error">
+          <div>Vrijeme je obavezno</div>
+        </div>-->
+      </section>
+      <div fxFlex="20%" fxLayoutAlign="end center">
+        <button *ngIf="orderId != 0" class="btn btn-danger" (click)="deleteOrder()" [disabled]="!menu || !menu.canOrder" title="{{(!menu || !menu.canOrder)? 'Verijeme za narudžbu je isteklo' : ''}}">
+          Poništi
+        </button>
+        <button (click)="createOrder()" [disabled]="!menu || !menu.canOrder" title="{{(!menu || !menu.canOrder)? 'Verijeme za narudžbu je isteklo' : ''}}" class="btn btn-primary ml-1">
+          Naruči
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!--CARD HRANA-->
+<div class="card">
+  <div class="card-header" fxLayout="row" fxLayoutAlign="space-between center">
+    <h4 fxFlex="20%">
+      Hrana 
+    </h4>
+    <div fxFlex="80%" fxLayout="row" fxLayoutAlign="space-between center">
+      <div fxFlex="30%">
+        <input [(ngModel)]="filterHrana" type="text" placeholder="Filtriraj hranu" class="form-control" />
+      </div>
+      <div fxFlex="50%" fxLayoutAlign="end center">
+        <button *ngIf="adminMode" class="btn btn-primary" (click)="kreirajHranu(false)">
+          Kreiraj novu
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <mat-accordion class="example-headers-align">
+      <div *ngIf="hranaArray">
+        <div *ngFor="let item of hranaArray; let i = index;">
+          <!--Expamsion panel-->
+          <mat-expansion-panel *ngIf="item.naziv.toLowerCase().indexOf(filterHrana.toLowerCase()) != -1 && isInMenu(item)"
+                               [ngClass]="{'selected-food': item.izabrana, 'expanded': step === i}"
+                               [expanded]="step === i"
+                               (opened)="setStep(i)"
+                               hideToggle>
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <img *ngIf="!item.image" src="../../assets/images/food.png" title="Ne postoji fotografija hrane" alt="Ne postoji fotografija hrane">
+                <img *ngIf="item.image" src="{{imagesUrl}}{{item.image}}">
+              </mat-panel-title>
+              <mat-panel-description>
+                <h4>{{item.naziv}}</h4>
+                <div fxLayoutAlign="end center">
+                  <star-rating (starClickChange)="onRatingChange($event, item.hranaId)"
+                               [hoverEnabled]="true" staticColor="thisIsBugFix"
+                               (click)="stopPropagation($event)"
+                               [starType]="'svg'"
+                               [rating]="item.rating"></star-rating>
+                  <button *ngIf="adminMode" (click)="addFoodToMenu($event, item)" [ngClass]="item.izabrana ? 'btn-success': 'btn-light'" class="btn ml-2">
+                    {{item.izabrana? 'Ukloni iz menija' : 'Dodaj u meni'}}
+                  </button>
+                  <div class="icon-place-holder">
+                    <!--<div *ngIf="step === i">
+                      <mat-icon *ngIf="i > 0" class="btn" mat-button color="secondary" title="Prethodni" (click)="prevStep($event)">keyboard_arrow_left</mat-icon>
+                      <mat-icon class="btn" mat-button color="primary"
+                                title="{{i == hranaArray.length - 1 ? 'Kraj' : 'Sledeći'}}"
+                                (click)="nextStep($event)">
+                        keyboard_arrow_right
+                      </mat-icon>
+                    </div>-->
+                  </div>
+                </div>
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <!--Prilozi-->
+            <div *ngIf="item.prilozi.length > 0" class="card mt-2">
+              <h4 class="card-header">
+                Prilozi
+              </h4>
+              <div class="card-body">
+                <section class="prilog-section">
+                  <mat-checkbox *ngFor="let prilogItem of item.prilozi"
+                                class="prilog-margin" [(ngModel)]="prilogItem.izabran"
+                                [disabled]="!prilogItem.omogucen"
+                                (change)="onPrilogChange(item, prilogItem)">
+                    {{sideDishesMap[prilogItem.prilogId]}}
+                  </mat-checkbox>
+                </section>
+
+              </div>
+            </div>
+            <app-comments [food]="item"></app-comments>
+            
+
+            <mat-action-row>
+              <button *ngIf="adminMode" class="btn btn-secondary" (click)="editFood(item)">
+                Izmjeni
+              </button>
+              <button *ngIf="!adminMode" (click)="izaberiHranu($event, item)" [ngClass]="item.izabrana ? 'btn-success': 'btn-light'" class="btn ml-2">
+                Izaberi
+              </button>
+
+            </mat-action-row>
+          </mat-expansion-panel>
+        </div>
+      </div>
+    </mat-accordion>
+  </div>
+</div>
+
+<!--CARD STALNA HRANA-->
+<div class="card">
+
+  <div class="card-header" fxLayout="row" fxLayoutAlign="space-between center">
+    <h4 fxFlex="20%">
+      Stalna hrana
+    </h4>
+    <div fxFlex="80%" fxLayout="row" fxLayoutAlign="space-between center">
+      <!--<label for="username">Username</label>-->
+      <div fxFlex="30%">
+        <input [(ngModel)]="filterStalnaHrana" type="text" placeholder="Filtriraj hranu" class="form-control" />
+      </div>
+      <div fxFlex="50%" fxLayoutAlign="end center">
+        <button *ngIf="adminMode" class="btn btn-primary" (click)="kreirajHranu(true)">
+          Kreiraj novu
+        </button>
+
+      </div>
+    </div>
+  </div>
+
+  <!--Stanla hrana-->
+  <div class="card-body">
+    <mat-accordion class="example-headers-align">
+      <div *ngIf="hranaArray">
+        <div *ngFor="let item of stalnaHranaArray; let i = index;">
+          <!--Expansion panel-->
+          <mat-expansion-panel *ngIf="item.naziv.toLowerCase().indexOf(filterStalnaHrana.toLowerCase()) != -1 && isInMenu(item)"
+                               [ngClass]="{'selected-food': item.izabrana, 'expanded': stepStalna === i}"
+                               [expanded]="stepStalna === i"
+                               (opened)="setStepStalna(i)" hideToggle>
+            <mat-expansion-panel-header>
+              <mat-panel-title >
+                <img *ngIf="!item.image" src="../../assets/images/food.png" title="Ne postoji fotografija hrane" alt="Ne postoji fotografija hrane">
+                <img *ngIf="item.image" src="{{imagesUrl}}{{item.image}}" >
+
+              </mat-panel-title>
+              <mat-panel-description>
+                <h4>{{item.naziv}}</h4>
+                <div fxLayoutAlign="end center">
+                  <star-rating (starClickChange)="onRatingChange($event, item.hranaId)"
+                               [hoverEnabled]="true" staticColor="thisIsBugFix"
+                               (click)="stopPropagation($event)"
+                               [starType]="'svg'"
+                               [rating]="item.rating"></star-rating>
+                  <button *ngIf="adminMode" (click)="addFoodToMenu($event, item)" [ngClass]="item.izabrana ? 'btn-success': 'btn-light'" class="btn ml-2">
+                    {{item.izabrana? 'Ukloni iz menija' : 'Dodaj u meni'}}
+                  </button>
+                  <!--<div class="icon-place-holder">
+                    <div *ngIf="stepStalna === i">
+                      <mat-icon *ngIf="i > 0" class="btn" mat-button color="secondary" title="Prethodni" (click)="prevStepStalna($event)">keyboard_arrow_left</mat-icon>
+                      <mat-icon class="btn" mat-button color="primary"
+                                title="{{i == stalnaHranaArray.length - 1 ? 'Kraj' : 'Sledeći'}}"
+                                (click)="nextStepStalna($event)">
+                        keyboard_arrow_right
+                      </mat-icon>
+                    </div>
+                  </div>-->
+
+                </div>
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <!--Prilozi-->
+            <div *ngIf="item.prilozi.length > 0" class="card mt-2">
+              <h4 class="card-header">
+                Prilozi 
+              </h4>
+              <div class="card-body">
+                <section class="prilog-section">
+                  <mat-checkbox *ngFor="let prilogItem of item.prilozi"
+                                class="prilog-margin" [(ngModel)]="prilogItem.izabran"
+                                [disabled]="!prilogItem.omogucen"
+                                (change)="onPrilogChange(item, prilogItem)">
+                    {{sideDishesMap[prilogItem.prilogId]}}
+                  </mat-checkbox>
+                </section>
+
+              </div>
+            </div>
+            <app-comments [food]="item"></app-comments>
+            <mat-action-row>
+
+              <button *ngIf="adminMode" class="btn btn-secondary" (click)="editFood(item)">
+                Izmjeni
+              </button>
+              <button *ngIf="!adminMode" (click)="izaberiHranu($event, item)" [ngClass]="item.izabrana ? 'btn-success': 'btn-light'" class="btn ml-2">
+                Izaberi
+              </button>
+            </mat-action-row>
+          </mat-expansion-panel>
+
+
+        </div>
+      </div>
+    </mat-accordion>
+  </div>
+
+</div>
+
+

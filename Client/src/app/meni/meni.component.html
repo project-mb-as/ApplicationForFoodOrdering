@@ -1,0 +1,77 @@
+<div class="col-md-6 offset-md-3 mt-5">
+  <div class="card" >
+    <div class="card-header" fxLayout="row" fxLayoutAlign="space-between center" >
+      <h4  fxFlex="50%">
+        Meni za datum
+      </h4>
+      <div fxFlex="50%" fxLayoutAlign="end center" >
+        <app-date-picker (dateChange)="onDateChange($event)" [initDate]="nextDay"></app-date-picker>
+      </div>
+    </div>
+    <div class="card-body">
+
+      <section class="prilog-section">
+        <mat-radio-button class="prilog-margin">Caevec</mat-radio-button>
+        <mat-radio-button class="prilog-margin">Medicinska Elektronika</mat-radio-button>
+        <mat-radio-button class="prilog-margin">ETF</mat-radio-button>
+      </section>
+
+      <section class="prilog-section">
+        <mat-radio-button class="prilog-margin">11:30h</mat-radio-button>
+        <mat-radio-button class="prilog-margin">12:30h</mat-radio-button>
+      </section>
+
+    </div>
+  </div>
+
+  <!--<mat-label>Angular forms</mat-label>
+    <input matInput [matDatepicker]="picker1" [formControl]="date">
+    <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
+    <mat-datepicker #picker1></mat-datepicker>
+
+
+  <mat-radio-group aria-label="Izaberi obrok">
+    <mat-radio-button value="1">Option 1</mat-radio-button>
+    <mat-radio-button value="2">Option 2</mat-radio-button>
+  </mat-radio-group>-->
+</div>
+
+<mat-accordion class="example-headers-align">
+  <div *ngIf="meni">
+    <mat-expansion-panel *ngFor="let item of meni.hrana; let i = index;" [expanded]="step === i" (opened)="setStep(i)" hideToggle>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <img src="https://material.angular.io/assets/img/examples/shiba2.jpg" alt="Photo of a Shiba Inu">
+
+        </mat-panel-title>
+        <mat-panel-description>
+          {{item.naziv}}
+          <mat-icon>account_circle</mat-icon>
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      <!--Prilozi-->
+      <div *ngIf="item.prilozi.length > 0" class="card mt-2">
+        <h4 class="card-header">
+          Prilozi
+        </h4>
+        <div class="card-body">
+          <section  class="prilog-section">
+            <mat-checkbox *ngFor="let prilogItem of item.prilozi"
+                          class="prilog-margin" [(ngModel)]="prilogItem.izabran"
+                          [disabled]="!prilogItem.omogucen"
+                          (change)="onPrilogChange(item, prilogItem)">{{prilogItem.naziv}}
+            </mat-checkbox>
+          </section>
+
+        </div>
+      </div>
+
+      <mat-action-row>
+        <button *ngIf="i > 0" mat-button color="warn" (click)="prevStep()">Prethodni</button>
+        <button mat-button color="primary" (click)="nextStep()">{{i == meni.hrana.length - 1 ? 'Kraj' : 'Sledeći'}}</button>
+      </mat-action-row>
+    </mat-expansion-panel>
+  </div>
+
+</mat-accordion>
